@@ -295,18 +295,31 @@
 
       <div class="section-title">基本信息</div>
       <div class="form-card">
-        <div class="form-tip">📌 供内部存档，不计入评分</div>
+        <div class="form-tip">📌 供内部存档，不计入评分。您的联系方式仅用于后续专家回访</div>
         <div class="form-group">
-          <div class="form-label"><span class="required">*</span> 填写部门</div>
-          <input class="form-input" id="dept" placeholder="请输入您所在部门" oninput="checkForm()">
+          <div class="form-label"><span class="required">*</span> 姓名</div>
+          <input class="form-input" id="name" placeholder="请输入您的姓名" oninput="checkForm()">
         </div>
         <div class="form-group">
-          <div class="form-label"><span class="required">*</span> 填写人职位</div>
-          <input class="form-input" id="pos" placeholder="请输入您的职位" oninput="checkForm()">
+          <div class="form-label"><span class="required">*</span> 电话</div>
+          <input class="form-input" id="phone" type="tel" placeholder="请输入您的手机号" oninput="checkForm()">
         </div>
         <div class="form-group">
-          <div class="form-label"><span class="required">*</span> 企业类型</div>
-          <select class="form-select" id="ctype" onchange="checkForm()">
+          <div class="form-label"><span class="required">*</span> 邮箱</div>
+          <input class="form-input" id="email" type="email" placeholder="请输入您的电子邮箱" oninput="checkForm()">
+        </div>
+        <div style="height:1px;background:#eee;margin:4px 0 16px"></div>
+        <div class="form-group">
+          <div class="form-label">填写部门</div>
+          <input class="form-input" id="dept" placeholder="请输入您所在部门">
+        </div>
+        <div class="form-group">
+          <div class="form-label">填写人职位</div>
+          <input class="form-input" id="pos" placeholder="请输入您的职位">
+        </div>
+        <div class="form-group">
+          <div class="form-label">企业类型</div>
+          <select class="form-select" id="ctype">
             <option value="">请选择企业类型</option>
             <option value="纯国内业务">纯国内业务</option>
             <option value="有出口业务">有出口业务</option>
@@ -518,11 +531,11 @@ let state = {
 }
 
 function checkForm() {
-  const d = document.getElementById('dept').value.trim()
-  const p = document.getElementById('pos').value.trim()
-  const t = document.getElementById('ctype').value
+  const n = document.getElementById('name').value.trim()
+  const p = document.getElementById('phone').value.trim()
+  const e = document.getElementById('email').value.trim()
   const btn = document.getElementById('startBtn')
-  if (d && p && t) {
+  if (n && p && e) {
     btn.className = 'start-btn active'
   } else {
     btn.className = 'start-btn inactive'
@@ -530,14 +543,22 @@ function checkForm() {
 }
 
 function startQuestionnaire() {
-  const d = document.getElementById('dept').value.trim()
-  const p = document.getElementById('pos').value.trim()
-  const t = document.getElementById('ctype').value
-  if (!d || !p || !t) {
-    alert('请完善带 * 的必填信息')
+  const n = document.getElementById('name').value.trim()
+  const p = document.getElementById('phone').value.trim()
+  const e = document.getElementById('email').value.trim()
+  if (!n || !p || !e) {
+    alert('请完善带 * 的必填信息（姓名、电话、邮箱）')
     return
   }
-  state.formData = { department: d, position: p, companyType: t, languagePair: document.getElementById('lang').value }
+  state.formData = {
+    name: n,
+    phone: p,
+    email: e,
+    department: document.getElementById('dept').value.trim(),
+    position: document.getElementById('pos').value.trim(),
+    companyType: document.getElementById('ctype').value,
+    languagePair: document.getElementById('lang').value.trim()
+  }
   state.answers = {}
   state.currentDim = 0
   renderQuestionnaire(0)
@@ -635,6 +656,34 @@ function showIncomplete() {
   alert('还有题目未完成，请作答全部题目后继续。')
 }
 
+// ============================================================
+// Google Apps Script 收集端（部署说明见下方 SUBMIT_CONFIG）
+// ============================================================
+const SUBMIT_CONFIG = {
+  // ⚠️ 替换为你自己的 Google Apps Script Web App URL
+  // 部署方法：
+  //  1. 打开 Google Sheets → 工具 → 脚本编辑器
+  //  2. 粘贴下方 doPost 代码，部署为 Web App（Anyone 可访问）
+  //  3. 复制 Web App URL 填入此处
+  url: 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'
+}
+
+function submitToSheet(payload) {
+  if (SUBMIT_CONFIG.url.indexOf('YOUR_SCRIPT_ID') !== -1) {
+    console.log('[跳过] 未配置 Google Apps Script URL，数据仅本地展示')
+    return Promise.resolve({ submitted: false })
+  }
+  return fetch(SUBMIT_CONFIG.url, {
+    method: 'POST',
+    mode: 'no-cors',  // Google Apps Script 返回 JSONP 不影响，CORS 友好
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(() => ({ submitted: true })).catch(e => {
+    console.error('[提交失败]', e)
+    return { submitted: false }
+  })
+}
+
 function submitQuestionnaire() {
   const allQIds = QUESTIONS.flatMap(d => d.qs.map(q => q.id))
   const missing = allQIds.filter(id => !state.answers[id]).length
@@ -642,8 +691,33 @@ function submitQuestionnaire() {
     alert(`还有 ${missing} 道题未作答，请完成全部题目后提交。`)
     return
   }
+  // 构建完整提交数据
+  const dimScores = QUESTIONS.map(dim => {
+    let score = 0
+    dim.qs.forEach(q => { if (state.answers[q.id]) score += state.answers[q.id].s })
+    return { dim: dim.dim, score, max: dim.qs.length * 5 }
+  })
+  const total = dimScores.reduce((s, d) => s + d.score, 0)
+  const level = LEVELS.find(l => total >= l.min && total <= l.max) || LEVELS[0]
+  const payload = {
+    submittedAt: new Date().toLocaleString('zh-CN'),
+    contact: state.formData,
+    totalScore: total,
+    level: level.level,
+    dimensions: dimScores,
+    answers: state.answers
+  }
+  // 先渲染结果（不阻塞）
   renderResult()
   showPage(2)
+  // 后台提交到 Sheets
+  submitToSheet(payload).then(res => {
+    if (!res.submitted) {
+      // 提示用户还未配置（仅开发时）
+      const el = document.getElementById('submitTip')
+      if (el) el.style.display = 'block'
+    }
+  })
 }
 
 function renderResult() {
@@ -670,11 +744,17 @@ function renderResult() {
   </div>
   <div class="r-card">
     <div class="r-card-title">📋 填写人信息</div>
+    <div id="submitTip" style="display:none;background:#FFF7ED;border:1px solid #F59E0B;border-radius:8px;padding:8px 12px;font-size:12px;color:#92400E;margin-bottom:12px">
+      ⚠️ 数据提交未配置，仅本地展示。请按页面底部说明配置 Google Apps Script。
+    </div>
     <div class="info-grid">
-      <div class="info-item-r"><span class="info-lbl">部门</span><span class="info-val-r">${state.formData.department}</span></div>
-      <div class="info-item-r"><span class="info-lbl">职位</span><span class="info-val-r">${state.formData.position}</span></div>
-      <div class="info-item-r"><span class="info-lbl">企业类型</span><span class="info-val-r">${state.formData.companyType}</span></div>
-      ${state.formData.languagePair?`<div class="info-item-r"><span class="info-lbl">语言对</span><span class="info-val-r">${state.formData.languagePair}</span></div>`:''}
+      <div class="info-item-r"><span class="info-lbl">姓名</span><span class="info-val-r">${state.formData.name}</span></div>
+      <div class="info-item-r"><span class="info-lbl">电话</span><span class="info-val-r">${state.formData.phone}</span></div>
+      <div class="info-item-r"><span class="info-lbl">邮箱</span><span class="info-val-r">${state.formData.email}</span></div>
+      <div class="info-item-r"><span class="info-lbl">部门</span><span class="info-val-r">${state.formData.department || '—'}</span></div>
+      <div class="info-item-r"><span class="info-lbl">职位</span><span class="info-val-r">${state.formData.position || '—'}</span></div>
+      <div class="info-item-r"><span class="info-lbl">企业类型</span><span class="info-val-r">${state.formData.companyType || '—'}</span></div>
+      ${state.formData.languagePair?`<div class="info-item-r" style="grid-column:1/-1"><span class="info-lbl">语言对</span><span class="info-val-r">${state.formData.languagePair}</span></div>`:''}
     </div>
   </div>
   <div class="r-card level-card" style="border-left-color:${level.color}">
@@ -804,6 +884,9 @@ function restartSurvey() {
   if (confirm('确定要清空当前答题记录并重新开始吗？')) {
     state.answers = {}
     state.currentDim = 0
+    document.getElementById('name').value = ''
+    document.getElementById('phone').value = ''
+    document.getElementById('email').value = ''
     document.getElementById('dept').value = ''
     document.getElementById('pos').value = ''
     document.getElementById('ctype').value = ''
