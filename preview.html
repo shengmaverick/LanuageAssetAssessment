@@ -673,12 +673,15 @@ function submitToSheet(payload) {
     console.log('[跳过] 未配置 Google Apps Script URL，数据仅本地展示')
     return Promise.resolve({ submitted: false })
   }
-  return fetch(SUBMIT_CONFIG.url, {
-    method: 'POST',
-    mode: 'no-cors',  // Google Apps Script 返回 JSONP 不影响，CORS 友好
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  }).then(() => ({ submitted: true })).catch(e => {
+  // 使用 GET + query string（Simple Request，无 CORS 预检问题）
+  const params = new URLSearchParams({ data: JSON.stringify(payload) })
+  return fetch(SUBMIT_CONFIG.url + '?' + params.toString(), {
+    method: 'GET',
+    mode: 'cors'
+  }).then(r => {
+    console.log('[提交成功] 状态:', r.status)
+    return { submitted: true }
+  }).catch(e => {
     console.error('[提交失败]', e)
     return { submitted: false }
   })
