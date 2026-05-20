@@ -1,0 +1,110 @@
+<!-- pages/index/index.wxml -->
+<view class="container">
+
+  <!-- 顶部 Hero 区域 -->
+  <view class="hero">
+    <view class="hero-bg"></view>
+    <view class="hero-content">
+      <view class="hero-icon">🌐</view>
+      <view class="hero-title">语言资产成熟度评估</view>
+      <view class="hero-subtitle">Language Asset Maturity Assessment</view>
+      <view class="hero-desc">系统评估企业在语言资产管理方面的成熟度</view>
+    </view>
+    <view class="hero-stats">
+      <view class="stat-item">
+        <text class="stat-num">20</text>
+        <text class="stat-label">道题目</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-num">5</text>
+        <text class="stat-label">大维度</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-num">100</text>
+        <text class="stat-label">满分</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 维度介绍卡片 -->
+  <view class="section-title">评估维度</view>
+  <scroll-view class="dimensions-scroll" scroll-x>
+    <view class="dimensions-row">
+      <view class="dim-card" wx:for="{{dimensions}}" wx:key="id" style="border-left: 6rpx solid {{item.color}}; background: {{item.bg}}">
+        <text class="dim-icon">{{item.icon}}</text>
+        <text class="dim-name">{{item.name}}</text>
+        <text class="dim-count">{{item.count}}题</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 基本信息表单 -->
+  <view class="section-title">基本信息</view>
+  <view class="form-card">
+    <view class="form-tip">📌 供内部存档，不计入评分</view>
+
+    <view class="form-group">
+      <view class="form-label"><text class="required">*</text> 填写部门</view>
+      <input
+        class="form-input"
+        placeholder="请输入您所在部门"
+        placeholder-class="input-placeholder"
+        value="{{department}}"
+        bindinput="onDepartmentInput"
+        maxlength="50"
+      />
+    </view>
+
+    <view class="form-group">
+      <view class="form-label"><text class="required">*</text> 填写人职位</view>
+      <input
+        class="form-input"
+        placeholder="请输入您的职位"
+        placeholder-class="input-placeholder"
+        value="{{position}}"
+        bindinput="onPositionInput"
+        maxlength="50"
+      />
+    </view>
+
+    <view class="form-group">
+      <view class="form-label"><text class="required">*</text> 企业类型</view>
+      <picker
+        range="{{companyTypeOptions}}"
+        value="{{companyTypeIndex}}"
+        bindchange="onCompanyTypeChange"
+      >
+        <view class="form-picker {{companyTypeIndex >= 0 ? 'picker-selected' : ''}}">
+          <text>{{companyType || '请选择企业类型'}}</text>
+          <text class="picker-arrow">›</text>
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-group">
+      <view class="form-label">主要语言对</view>
+      <input
+        class="form-input"
+        placeholder="例如：中英、中德、英日（选填）"
+        placeholder-class="input-placeholder"
+        value="{{languagePair}}"
+        bindinput="onLanguagePairInput"
+        maxlength="50"
+      />
+    </view>
+  </view>
+
+  <!-- 开始按钮 -->
+  <view class="start-section">
+    <button
+      class="start-btn {{formValid ? 'active' : 'disabled'}}"
+      bindtap="startQuestionnaire"
+    >
+      开始评估
+    </button>
+    <view class="start-hint">完成全部 20 道题后自动生成成熟度报告</view>
+  </view>
+
+</view>

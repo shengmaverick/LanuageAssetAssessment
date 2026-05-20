@@ -1,0 +1,116 @@
+<!-- pages/result/result.wxml -->
+<view class="container" wx:if="{{result}}">
+
+  <!-- 顶部成绩卡 -->
+  <view class="score-hero" style="background: linear-gradient(145deg, {{levelInfo.color}}, {{levelInfo.color}}aa)">
+    <view class="score-badge-wrap">
+      <view class="score-emoji">{{levelInfo.emoji}}</view>
+      <view class="score-main">{{totalScore}}</view>
+      <view class="score-max">/100分</view>
+    </view>
+    <view class="level-tag">{{levelInfo.level}}</view>
+    <view class="submit-time">提交时间：{{submitTime}}</view>
+  </view>
+
+  <!-- 企业信息 -->
+  <view class="card info-card">
+    <view class="card-title">📋 填写人信息</view>
+    <view class="info-grid">
+      <view class="info-item">
+        <text class="info-label">部门</text>
+        <text class="info-val">{{formData.department}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">职位</text>
+        <text class="info-val">{{formData.position}}</text>
+      </view>
+      <view class="info-item">
+        <text class="info-label">企业类型</text>
+        <text class="info-val">{{formData.companyType}}</text>
+      </view>
+      <view class="info-item" wx:if="{{formData.languagePair}}">
+        <text class="info-label">语言对</text>
+        <text class="info-val">{{formData.languagePair}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 等级说明 -->
+  <view class="card level-card" style="border-left: 8rpx solid {{levelInfo.color}}">
+    <view class="level-header">
+      <text class="level-emoji-lg">{{levelInfo.emoji}}</text>
+      <view>
+        <view class="level-name" style="color: {{levelInfo.color}}">{{levelInfo.level}}</view>
+        <view class="level-range">{{levelInfo.min}}–{{levelInfo.max}} 分区间</view>
+      </view>
+    </view>
+    <view class="level-desc">{{levelInfo.desc}}</view>
+  </view>
+
+  <!-- 雷达图 -->
+  <view class="card radar-card">
+    <view class="card-title">📊 五维度能力雷达图</view>
+    <canvas
+      type="2d"
+      id="radarCanvas"
+      class="radar-canvas"
+    ></canvas>
+  </view>
+
+  <!-- 各维度详细得分 -->
+  <view class="card dim-scores-card">
+    <view class="card-title">📈 各维度得分详情</view>
+    <view class="dim-score-list">
+      <view class="dim-score-item" wx:for="{{dimScores}}" wx:key="name">
+        <view class="dim-score-left">
+          <text class="dim-score-icon">{{item.icon}}</text>
+          <view class="dim-score-info">
+            <view class="dim-score-name">{{item.name}}</view>
+            <view class="dim-score-bar-wrap">
+              <view class="dim-score-bar-bg">
+                <view
+                  class="dim-score-bar-fill"
+                  style="width: {{item.percent}}%; background: {{item.color}}"
+                ></view>
+              </view>
+            </view>
+          </view>
+        </view>
+        <view class="dim-score-right">
+          <text class="dim-score-num" style="color: {{item.color}}">{{item.score}}</text>
+          <text class="dim-score-total">/{{item.maxScore}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 改进建议（可选） -->
+  <view class="card suggestions-card">
+    <view class="card-title-row" bindtap="toggleSuggestions">
+      <view class="card-title">💡 填写改进建议（可选）</view>
+      <text class="toggle-icon">{{showSuggestions ? '▲' : '▼'}}</text>
+    </view>
+    <view wx:if="{{showSuggestions}}" class="suggestions-wrap">
+      <view class="suggestions-hint">请列出您认为当前语言资产管理最亟需改进的三个方面：</view>
+      <textarea
+        class="suggestions-input"
+        placeholder="例如：1. 建立统一术语库 2. 引入TMS工具 3. 培训本地化团队"
+        placeholder-class="suggestions-placeholder"
+        value="{{suggestions}}"
+        bindinput="onSuggestionsInput"
+        maxlength="500"
+        auto-height
+      ></textarea>
+    </view>
+  </view>
+
+  <!-- 底部操作按钮 -->
+  <view class="bottom-actions">
+    <button class="action-btn restart-btn" bindtap="restartSurvey">重新评估</button>
+    <button class="action-btn contact-btn">联系咨询专家</button>
+  </view>
+
+  <view class="footer-tip">感谢您参与评估！如需详细分析报告或改进路线图，欢迎联系我们获取专业指导。</view>
+
+  <view class="safe-bottom"></view>
+</view>

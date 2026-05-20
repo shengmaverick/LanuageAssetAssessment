@@ -1,0 +1,67 @@
+/* app.wxss - 全局样式 */
+page {
+  background-color: #F5F7FF;
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+  color: #1a1a2e;
+  box-sizing: border-box;
+}
+
+.container {
+  min-height: 100vh;
+  padding: 0 0 40rpx 0;
+}
+
+/* 通用卡片 */
+.card {
+  background: #ffffff;
+  border-radius: 20rpx;
+  margin: 20rpx 24rpx;
+  padding: 36rpx 32rpx;
+  box-shadow: 0 4rpx 20rpx rgba(43, 92, 230, 0.08);
+}
+
+/* 按钮样式 */
+.btn-primary {
+  background: linear-gradient(135deg, #2B5CE6, #6C8EF5);
+  color: #fff;
+  border-radius: 50rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  letter-spacing: 2rpx;
+  height: 96rpx;
+  line-height: 96rpx;
+  text-align: center;
+  border: none;
+  box-shadow: 0 8rpx 24rpx rgba(43, 92, 230, 0.35);
+}
+
+.btn-primary:active {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #2B5CE6;
+  border-radius: 50rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  border: 2rpx solid #2B5CE6;
+}
+
+/* 标签样式 */
+.tag {
+  display: inline-block;
+  padding: 4rpx 18rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+}
+
+.tag-blue {
+  background: #EEF2FF;
+  color: #2B5CE6;
+}

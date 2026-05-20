@@ -1,0 +1,113 @@
+<!-- pages/questionnaire/questionnaire.wxml -->
+<view class="container">
+
+  <!-- 顶部固定：进度 + 维度TAB -->
+  <view class="sticky-top">
+    <!-- 进度条 -->
+    <view class="progress-bar-wrap">
+      <view class="progress-info">
+        <text class="progress-text">已完成 {{totalAnswered}}/{{totalQuestions}} 题</text>
+        <text class="progress-percent">{{progressPercent}}%</text>
+      </view>
+      <view class="progress-track">
+        <view class="progress-fill" style="width: {{progressPercent}}%"></view>
+      </view>
+    </view>
+
+    <!-- 维度 TAB -->
+    <scroll-view class="dim-nav-scroll" scroll-x scroll-with-animation>
+      <view class="dim-nav-row">
+        <view
+          class="dim-nav-item {{index === currentDimIndex ? 'nav-active' : ''}}"
+          wx:for="{{dimensions}}"
+          wx:key="id"
+          data-index="{{index}}"
+          bindtap="goToDim"
+          style="{{index === currentDimIndex ? 'border-bottom: 6rpx solid ' + item.color : 'border-bottom: 6rpx solid transparent'}}"
+        >
+          <text class="dim-nav-icon">{{item.icon}}</text>
+          <text class="dim-nav-name" style="{{index === currentDimIndex ? 'color:' + item.color : ''}}">{{item.name}}</text>
+          <view class="dim-done-dot {{dimStatus[index].done ? 'done' : ''}}"></view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 当前维度标题 -->
+  <view class="dim-header" style="background: {{dimensions[currentDimIndex].lightColor}}; border-left: 8rpx solid {{dimensions[currentDimIndex].color}}">
+    <view class="dim-header-main">
+      <text class="dim-header-icon">{{dimensions[currentDimIndex].icon}}</text>
+      <view class="dim-header-info">
+        <view class="dim-header-title">维度 {{currentDimIndex + 1}}：{{dimensions[currentDimIndex].name}}</view>
+        <view class="dim-header-sub">共 {{currentQuestions.length}} 道题 · 已答 {{currentDimAnswered}} 题</view>
+      </view>
+    </view>
+    <view class="dim-ring">
+      <text class="dim-ring-text" style="color: {{dimensions[currentDimIndex].color}}">{{currentDimAnswered}}/{{currentQuestions.length}}</text>
+    </view>
+  </view>
+
+  <!-- 题目卡片列表 -->
+  <view class="questions-wrap">
+    <view
+      class="question-card {{item.selectedOption ? 'answered' : ''}}"
+      wx:for="{{currentQuestions}}"
+      wx:key="id"
+    >
+      <view class="q-header">
+        <view class="q-badge" style="background: {{dimensions[currentDimIndex].color}}">{{item.id}}</view>
+        <view class="q-text">{{item.text}}</view>
+      </view>
+
+      <view class="options-wrap">
+        <view
+          class="option-row {{item.selectedOption === option.label ? 'opt-selected' : 'opt-default'}}"
+          wx:for="{{item.options}}"
+          wx:for-item="option"
+          wx:key="label"
+          data-qid="{{item.id}}"
+          data-score="{{option.score}}"
+          data-option-label="{{option.label}}"
+          bindtap="selectOption"
+          style="{{item.selectedOption === option.label ? 'border-color:' + dimensions[currentDimIndex].color + ';background:' + dimensions[currentDimIndex].lightColor : ''}}"
+        >
+          <view class="opt-label-badge {{item.selectedOption === option.label ? 'opt-label-selected' : ''}}" style="{{item.selectedOption === option.label ? 'background:' + dimensions[currentDimIndex].color : ''}}">
+            {{option.label}}
+          </view>
+          <view class="opt-text">{{option.text}}</view>
+          <view class="opt-score {{item.selectedOption === option.label ? '' : 'score-hidden'}}">+{{option.score}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部按钮区 -->
+  <view class="bottom-nav">
+    <button
+      class="btn-nav btn-prev"
+      wx:if="{{canPrev}}"
+      bindtap="goPrev"
+    >
+      ‹ 上一部分
+    </button>
+    <view class="btn-placeholder" wx:else></view>
+
+    <button
+      wx:if="{{!isLastDim}}"
+      class="btn-nav btn-next {{canNext ? 'btn-active' : 'btn-dim'}}"
+      bindtap="goNext"
+    >
+      下一部分 ›
+    </button>
+    <button
+      wx:if="{{isLastDim}}"
+      class="btn-nav btn-submit {{totalAnswered >= totalQuestions ? 'btn-active' : 'btn-dim'}}"
+      bindtap="submitQuestionnaire"
+      loading="{{submitting}}"
+    >
+      提交并查看结果
+    </button>
+  </view>
+
+  <view class="safe-bottom"></view>
+</view>

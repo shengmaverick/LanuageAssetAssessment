@@ -1,0 +1,298 @@
+/* pages/result/result.wxss */
+
+.container {
+  background: #F5F7FF;
+  min-height: 100vh;
+}
+
+/* 顶部评分 Hero */
+.score-hero {
+  padding: 48rpx 32rpx 44rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #fff;
+}
+
+.score-badge-wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: 8rpx;
+  margin-bottom: 20rpx;
+}
+
+.score-emoji {
+  font-size: 72rpx;
+  line-height: 1;
+  margin-bottom: 4rpx;
+}
+
+.score-main {
+  font-size: 120rpx;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 4rpx 16rpx rgba(0,0,0,0.2);
+}
+
+.score-max {
+  font-size: 32rpx;
+  opacity: 0.85;
+  margin-bottom: 16rpx;
+}
+
+.level-tag {
+  background: rgba(255,255,255,0.2);
+  border: 2rpx solid rgba(255,255,255,0.5);
+  border-radius: 50rpx;
+  padding: 10rpx 36rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+  letter-spacing: 4rpx;
+  backdrop-filter: blur(8px);
+  margin-bottom: 16rpx;
+}
+
+.submit-time {
+  font-size: 22rpx;
+  opacity: 0.7;
+}
+
+/* 通用卡片 */
+.card {
+  background: #fff;
+  border-radius: 20rpx;
+  margin: 20rpx 24rpx;
+  padding: 36rpx 32rpx;
+  box-shadow: 0 4rpx 20rpx rgba(43, 92, 230, 0.07);
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 24rpx;
+}
+
+.card-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toggle-icon {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 信息卡片 */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+}
+
+.info-item {
+  background: #F5F7FF;
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+}
+
+.info-label {
+  font-size: 22rpx;
+  color: #999;
+  display: block;
+  margin-bottom: 6rpx;
+}
+
+.info-val {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+/* 等级说明 */
+.level-header {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.level-emoji-lg {
+  font-size: 64rpx;
+}
+
+.level-name {
+  font-size: 36rpx;
+  font-weight: 800;
+}
+
+.level-range {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 4rpx;
+}
+
+.level-desc {
+  font-size: 26rpx;
+  color: #555;
+  line-height: 1.8;
+  background: #F5F7FF;
+  padding: 20rpx;
+  border-radius: 12rpx;
+}
+
+/* 雷达图 */
+.radar-card {
+  padding-bottom: 20rpx;
+}
+
+.radar-canvas {
+  width: 100%;
+  height: 580rpx;
+  display: block;
+}
+
+/* 维度得分 */
+.dim-score-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.dim-score-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.dim-score-left {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex: 1;
+}
+
+.dim-score-icon {
+  font-size: 40rpx;
+  flex-shrink: 0;
+}
+
+.dim-score-info {
+  flex: 1;
+}
+
+.dim-score-name {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.dim-score-bar-wrap {
+  flex: 1;
+}
+
+.dim-score-bar-bg {
+  height: 12rpx;
+  background: #eee;
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+
+.dim-score-bar-fill {
+  height: 100%;
+  border-radius: 8rpx;
+  transition: width 0.6s ease;
+}
+
+.dim-score-right {
+  display: flex;
+  align-items: baseline;
+  gap: 2rpx;
+  min-width: 90rpx;
+  justify-content: flex-end;
+}
+
+.dim-score-num {
+  font-size: 44rpx;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.dim-score-total {
+  font-size: 22rpx;
+  color: #aaa;
+}
+
+/* 改进建议 */
+.suggestions-wrap {
+  padding-top: 8rpx;
+}
+
+.suggestions-hint {
+  font-size: 24rpx;
+  color: #888;
+  margin-bottom: 16rpx;
+  line-height: 1.6;
+}
+
+.suggestions-input {
+  width: 100%;
+  min-height: 160rpx;
+  background: #F5F7FF;
+  border-radius: 14rpx;
+  padding: 20rpx 24rpx;
+  font-size: 26rpx;
+  color: #333;
+  line-height: 1.7;
+  box-sizing: border-box;
+}
+
+.suggestions-placeholder {
+  color: #ccc;
+  font-size: 26rpx;
+}
+
+/* 底部按钮 */
+.bottom-actions {
+  display: flex;
+  gap: 20rpx;
+  padding: 8rpx 24rpx 20rpx;
+}
+
+.action-btn {
+  flex: 1;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  text-align: center;
+  border: none;
+}
+
+.restart-btn {
+  background: #fff;
+  color: #2B5CE6;
+  border: 2rpx solid #2B5CE6;
+}
+
+.contact-btn {
+  background: linear-gradient(135deg, #2B5CE6, #6C8EF5);
+  color: #fff;
+  box-shadow: 0 6rpx 20rpx rgba(43, 92, 230, 0.3);
+}
+
+.footer-tip {
+  text-align: center;
+  font-size: 24rpx;
+  color: #aaa;
+  padding: 0 40rpx 20rpx;
+  line-height: 1.8;
+}
+
+.safe-bottom {
+  height: 60rpx;
+}

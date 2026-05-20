@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=375px, maximum-scale=1.0">
+<title>语言资产成熟度评估 - 小程序预览</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    background: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .phone-frame {
+    width: 375px;
+    min-height: 812px;
+    background: #F5F7FF;
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(255,255,255,0.15);
+    position: relative;
+  }
+  .status-bar {
+    background: #2B5CE6;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .nav-bar {
+    background: #2B5CE6;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  /* 页面容器 */
+  .page { display: none; height: calc(812px - 88px); overflow-y: auto; background: #F5F7FF; }
+  .page.active { display: block; }
+
+  /* ========== 首页 ========== */
+  .hero {
+    background: linear-gradient(145deg, #1a3bc0 0%, #2B5CE6 50%, #5B7FEE 100%);
+    padding: 30px 20px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -30px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+  .hero-icon { font-size: 48px; display: block; margin-bottom: 10px; }
+  .hero-title { color: white; font-size: 24px; font-weight: 700; line-height: 1.3; margin-bottom: 6px; }
+  .hero-subtitle { color: rgba(255,255,255,0.7); font-size: 12px; font-style: italic; margin-bottom: 10px; }
+  .hero-desc { color: rgba(255,255,255,0.9); font-size: 14px; line-height: 1.6; margin-bottom: 16px; }
+  .hero-stats {
+    background: rgba(255,255,255,0.12);
+    border-radius: 12px 12px 0 0;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-around;
+  }
+  .stat-item { text-align: center; }
+  .stat-num { display: block; font-size: 32px; font-weight: 800; color: white; }
+  .stat-label { font-size: 12px; color: rgba(255,255,255,0.8); }
+  .stat-divider { width: 1px; background: rgba(255,255,255,0.25); }
+
+  .section-title { font-size: 12px; font-weight: 700; color: #888; padding: 16px 16px 8px; letter-spacing: 2px; text-transform: uppercase; }
+
+  .dimensions-row { display: flex; gap: 10px; padding: 0 14px 8px; overflow-x: auto; }
+  .dim-card { padding: 14px 16px; border-radius: 12px; min-width: 96px; flex-shrink: 0; }
+  .dim-card-icon { font-size: 28px; display: block; margin-bottom: 6px; }
+  .dim-card-name { font-size: 13px; font-weight: 600; color: #1a1a2e; line-height: 1.3; }
+  .dim-card-count { font-size: 11px; color: #999; margin-top: 3px; }
+
+  .form-card { background: white; border-radius: 14px; margin: 0 14px; padding: 20px; box-shadow: 0 2px 12px rgba(43,92,230,0.08); }
+  .form-tip { font-size: 12px; color: #888; background: #f8f9fd; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; }
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 8px; }
+  .required { color: #EF4444; margin-right: 3px; }
+  .form-input, .form-select {
+    width: 100%; height: 44px; background: #F5F7FF; border-radius: 10px;
+    padding: 0 14px; font-size: 14px; color: #333; border: 1.5px solid transparent;
+    outline: none; cursor: pointer;
+  }
+  .form-input:focus { border-color: #2B5CE6; background: white; }
+
+  .start-section { padding: 20px 14px 30px; text-align: center; }
+  .start-btn {
+    width: 100%; height: 50px; border-radius: 25px; border: none;
+    font-size: 18px; font-weight: 700; letter-spacing: 4px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .start-btn.active {
+    background: linear-gradient(135deg, #2B5CE6, #6C8EF5);
+    color: white;
+    box-shadow: 0 6px 20px rgba(43,92,230,0.35);
+  }
+  .start-btn.inactive { background: #ddd; color: #aaa; }
+  .start-hint { font-size: 12px; color: #999; margin-top: 12px; }
+
+  /* ========== 问卷页 ========== */
+  .sticky-top { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .progress-wrap { padding: 10px 14px 8px; }
+  .prog-info { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; color: #666; }
+  .prog-percent { font-weight: 700; color: #2B5CE6; }
+  .prog-track { height: 5px; background: #E8ECFF; border-radius: 5px; overflow: hidden; }
+  .prog-fill { height: 100%; background: linear-gradient(90deg, #2B5CE6, #6C8EF5); border-radius: 5px; transition: width 0.3s; }
+
+  .dim-nav { display: flex; overflow-x: auto; padding: 0 6px; background: white; }
+  .dim-nav-tab {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 8px 10px; min-width: 70px; flex-shrink: 0;
+    cursor: pointer; position: relative; border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  .dim-nav-tab.tab-active { border-bottom-color: #2B5CE6; }
+  .tab-icon { font-size: 20px; }
+  .tab-name { font-size: 11px; color: #888; margin-top: 2px; white-space: nowrap; }
+  .dim-nav-tab.tab-active .tab-name { font-weight: 700; }
+  .tab-dot { width: 7px; height: 7px; border-radius: 50%; background: transparent; position: absolute; top: 5px; right: 6px; transition: background 0.2s; }
+  .tab-dot.done { background: #10B981; }
+
+  .q-page-content { padding: 12px 14px; }
+  .dim-header-card { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-radius: 12px; margin-bottom: 12px; }
+  .dim-h-left { display: flex; align-items: center; gap: 10px; }
+  .dim-h-icon { font-size: 32px; }
+  .dim-h-title { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+  .dim-h-sub { font-size: 11px; color: #888; margin-top: 2px; }
+  .dim-ring { width: 46px; height: 46px; border-radius: 50%; border: 3px solid; display: flex; align-items: center; justify-content: center; background: white; }
+  .dim-ring-text { font-size: 11px; font-weight: 700; }
+
+  .q-card { background: white; border-radius: 14px; padding: 18px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .q-card.answered { box-shadow: 0 3px 12px rgba(43,92,230,0.1); }
+  .q-header-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
+  .q-badge { min-width: 34px; height: 24px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 700; flex-shrink: 0; padding: 0 6px; }
+  .q-text { font-size: 14px; font-weight: 600; color: #1a1a2e; line-height: 1.6; }
+
+  .opt { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 10px; border: 1.5px solid #eee; background: #fafafa; margin-bottom: 8px; cursor: pointer; transition: all 0.2s; }
+  .opt.selected { }
+  .opt-lbl { min-width: 28px; height: 28px; border-radius: 50%; background: #e0e0e0; color: #666; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .opt.selected .opt-lbl { color: white; }
+  .opt-txt { font-size: 13px; color: #444; line-height: 1.5; flex: 1; }
+  .opt-sc { font-size: 11px; font-weight: 700; color: #2B5CE6; background: #EEF2FF; padding: 2px 8px; border-radius: 12px; flex-shrink: 0; opacity: 0; transition: opacity 0.2s; }
+  .opt.selected .opt-sc { opacity: 1; }
+
+  .nav-btns { display: flex; gap: 10px; padding: 12px 14px 16px; }
+  .nav-btn { flex: 1; height: 46px; border-radius: 23px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; }
+  .btn-prev-s { background: white; color: #2B5CE6; border: 1.5px solid #2B5CE6; }
+  .btn-next-s.btn-ok { background: linear-gradient(135deg, #2B5CE6, #6C8EF5); color: white; box-shadow: 0 4px 14px rgba(43,92,230,0.35); }
+  .btn-next-s.btn-no { background: #ddd; color: #aaa; }
+  .btn-submit-s.btn-ok { background: linear-gradient(135deg, #059669, #34D399); color: white; box-shadow: 0 4px 14px rgba(5,150,105,0.35); }
+  .btn-submit-s.btn-no { background: #ddd; color: #aaa; }
+  .btn-ph { flex: 1; }
+
+  /* ========== 结果页 ========== */
+  .score-hero { padding: 30px 20px 24px; display: flex; flex-direction: column; align-items: center; color: white; }
+  .score-badge { display: flex; align-items: flex-end; gap: 6px; margin-bottom: 14px; }
+  .score-emoji { font-size: 52px; }
+  .score-num { font-size: 80px; font-weight: 900; line-height: 1; }
+  .score-max { font-size: 20px; opacity: 0.85; margin-bottom: 10px; }
+  .level-pill { background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.5); border-radius: 25px; padding: 6px 22px; font-size: 18px; font-weight: 700; letter-spacing: 3px; margin-bottom: 10px; }
+  .score-time { font-size: 11px; opacity: 0.7; }
+
+  .r-card { background: white; border-radius: 14px; margin: 10px 14px; padding: 18px 20px; box-shadow: 0 2px 12px rgba(43,92,230,0.07); }
+  .r-card-title { font-size: 15px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .info-item-r { background: #F5F7FF; border-radius: 8px; padding: 10px 12px; }
+  .info-lbl { font-size: 11px; color: #999; display: block; margin-bottom: 4px; }
+  .info-val-r { font-size: 14px; font-weight: 600; color: #1a1a2e; }
+
+  .level-card { border-left-width: 5px; border-left-style: solid; }
+  .level-h { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .level-emoji-r { font-size: 40px; }
+  .level-name-r { font-size: 22px; font-weight: 800; }
+  .level-range-r { font-size: 11px; color: #999; margin-top: 2px; }
+  .level-desc-r { font-size: 13px; color: #555; line-height: 1.8; background: #F5F7FF; padding: 12px; border-radius: 8px; }
+
+  canvas.radar { width: 100%; height: 300px; display: block; }
+
+  .dim-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .dim-row-left { display: flex; align-items: center; gap: 10px; flex: 1; }
+  .dim-row-icon { font-size: 26px; flex-shrink: 0; }
+  .dim-row-info { flex: 1; }
+  .dim-row-name { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 6px; }
+  .bar-track { height: 8px; background: #eee; border-radius: 5px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 5px; transition: width 0.6s ease; }
+  .dim-row-right { min-width: 56px; text-align: right; }
+  .dim-sc-num { font-size: 28px; font-weight: 800; }
+  .dim-sc-tot { font-size: 11px; color: #aaa; }
+
+  .bottom-btns { display: flex; gap: 12px; padding: 8px 14px 16px; }
+  .ab { flex: 1; height: 46px; border-radius: 23px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; }
+  .ab-restart { background: white; color: #2B5CE6; border: 1.5px solid #2B5CE6; }
+  .ab-contact { background: linear-gradient(135deg, #2B5CE6, #6C8EF5); color: white; box-shadow: 0 4px 14px rgba(43,92,230,0.3); }
+  .footer-t { text-align: center; font-size: 11px; color: #aaa; padding: 0 20px 24px; line-height: 1.8; }
+
+  /* 页面切换 */
+  .page-btn { display: none; }
+  
+  /* 外部信息 */
+  .outside-info {
+    width: 375px;
+    padding: 16px 0;
+    text-align: center;
+    color: rgba(255,255,255,0.5);
+    font-size: 12px;
+  }
+  .page-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .pi { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: background 0.2s; }
+  .pi.pact { background: rgba(255,255,255,0.9); }
+</style>
+</head>
+<body>
+
+<div style="display:flex;flex-direction:column;align-items:center;">
+  <div class="outside-info">
+    📱 微信小程序 · 语言资产成熟度评估<br>
+    <small style="font-size:10px">点击下方指示点切换页面预览</small>
+  </div>
+
+  <div class="phone-frame">
+    <div class="status-bar">
+      <span>9:41</span>
+      <span>●●● 📶 🔋</span>
+    </div>
+    <div class="nav-bar" id="navTitle">语言资产成熟度评估</div>
+
+    <!-- ===== 首页 ===== -->
+    <div class="page active" id="page-index">
+      <div class="hero">
+        <span class="hero-icon">🌐</span>
+        <div class="hero-title">语言资产成熟度评估</div>
+        <div class="hero-subtitle">Language Asset Maturity Assessment</div>
+        <div class="hero-desc">系统评估企业在语言资产管理方面的成熟度</div>
+        <div class="hero-stats">
+          <div class="stat-item"><span class="stat-num">20</span><span class="stat-label">道题目</span></div>
+          <div class="stat-divider"></div>
+          <div class="stat-item"><span class="stat-num">5</span><span class="stat-label">大维度</span></div>
+          <div class="stat-divider"></div>
+          <div class="stat-item"><span class="stat-num">100</span><span class="stat-label">满分</span></div>
+        </div>
+      </div>
+
+      <div class="section-title">评估维度</div>
+      <div class="dimensions-row">
+        <div class="dim-card" style="border-left: 5px solid #2B5CE6; background: #EEF2FF">
+          <span class="dim-card-icon">📚</span>
+          <div class="dim-card-name">术语管理</div>
+          <div class="dim-card-count">4题</div>
+        </div>
+        <div class="dim-card" style="border-left: 5px solid #7C3AED; background: #F3EEFF">
+          <span class="dim-card-icon">💾</span>
+          <div class="dim-card-name">翻译记忆库</div>
+          <div class="dim-card-count">4题</div>
+        </div>
+        <div class="dim-card" style="border-left: 5px solid #059669; background: #ECFDF5">
+          <span class="dim-card-icon">✍️</span>
+          <div class="dim-card-name">风格指南</div>
+          <div class="dim-card-count">4题</div>
+        </div>
+        <div class="dim-card" style="border-left: 5px solid #DC2626; background: #FEF2F2">
+          <span class="dim-card-icon">⚙️</span>
+          <div class="dim-card-name">技术集成</div>
+          <div class="dim-card-count">4题</div>
+        </div>
+        <div class="dim-card" style="border-left: 5px solid #D97706; background: #FFFBEB">
+          <span class="dim-card-icon">🏢</span>
+          <div class="dim-card-name">组织与文化</div>
+          <div class="dim-card-count">4题</div>
+        </div>
+      </div>
+
+      <div class="section-title">基本信息</div>
+      <div class="form-card">
+        <div class="form-tip">📌 供内部存档，不计入评分</div>
+        <div class="form-group">
+          <div class="form-label"><span class="required">*</span> 填写部门</div>
+          <input class="form-input" id="dept" placeholder="请输入您所在部门" oninput="checkForm()">
+        </div>
+        <div class="form-group">
+          <div class="form-label"><span class="required">*</span> 填写人职位</div>
+          <input class="form-input" id="pos" placeholder="请输入您的职位" oninput="checkForm()">
+        </div>
+        <div class="form-group">
+          <div class="form-label"><span class="required">*</span> 企业类型</div>
+          <select class="form-select" id="ctype" onchange="checkForm()">
+            <option value="">请选择企业类型</option>
+            <option value="纯国内业务">纯国内业务</option>
+            <option value="有出口业务">有出口业务</option>
+            <option value="多国本地化运营">多国本地化运营</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <div class="form-label">主要语言对</div>
+          <input class="form-input" id="lang" placeholder="例如：中英、中德（选填）">
+        </div>
+      </div>
+
+      <div class="start-section">
+        <button class="start-btn inactive" id="startBtn" onclick="startQuestionnaire()">开始评估</button>
+        <div class="start-hint">完成全部 20 道题后自动生成成熟度报告</div>
+      </div>
+    </div>
+
+    <!-- ===== 问卷页 ===== -->
+    <div class="page" id="page-q">
+      <div class="sticky-top">
+        <div class="progress-wrap">
+          <div class="prog-info">
+            <span id="progText">已完成 0/20 题</span>
+            <span class="prog-percent" id="progPct">0%</span>
+          </div>
+          <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+        </div>
+        <div class="dim-nav" id="dimNav"></div>
+      </div>
+      <div class="q-page-content" id="qContent"></div>
+    </div>
+
+    <!-- ===== 结果页 ===== -->
+    <div class="page" id="page-result">
+      <div id="resultContent"></div>
+    </div>
+  </div>
+
+  <div class="page-indicator">
+    <div class="pi pact" onclick="showPage(0)" title="首页"></div>
+    <div class="pi" onclick="showPage(1)" title="问卷页"></div>
+    <div class="pi" onclick="showPage(2)" title="结果页"></div>
+  </div>
+  <div class="outside-info" style="font-size:10px">← 首页 · 问卷 · 结果 →</div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    dimId: 1, dim: '术语管理', icon: '📚', color: '#2B5CE6', light: '#EEF2FF',
+    qs: [
+      { id:'Q1', text:'企业是否有统一的产品/技术术语表？', opts:[
+        {l:'A',t:'没有术语表，各团队自行决定用语',s:1},
+        {l:'B',t:'有术语表，但仅存于个别员工的个人文档中',s:2},
+        {l:'C',t:'有术语表，部门内可访问，但更新不及时',s:3},
+        {l:'D',t:'有集中的术语库，且与翻译流程关联，定期评审',s:4},
+        {l:'E',t:'术语库全公司可见，新项目强制引用，并有版本记录',s:5}
+      ]},
+      { id:'Q2', text:'术语表覆盖的内容范围是？', opts:[
+        {l:'A',t:'无术语表',s:1},{l:'B',t:'仅有产品名称/品牌词',s:2},
+        {l:'C',t:'覆盖产品名称、技术参数、常用术语',s:3},
+        {l:'D',t:'覆盖产品、技术、市场关键词及品牌语调',s:4},
+        {l:'E',t:'覆盖行业专业术语、品牌语调、禁用词库、文化敏感词',s:5}
+      ]},
+      { id:'Q3', text:'新术语的添加和变更是否有规范流程？', opts:[
+        {l:'A',t:'无流程，谁想加就加',s:1},{l:'B',t:'由个别人员决定，无书面记录',s:2},
+        {l:'C',t:'有流程但审批周期长，影响项目进度',s:3},
+        {l:'D',t:'有清晰流程，通常一周内完成审批',s:4},
+        {l:'E',t:'流程自动化，相关人员在线提交/投票/审批，实时生效',s:5}
+      ]},
+      { id:'Q4', text:'团队在使用术语时如何确保一致性？', opts:[
+        {l:'A',t:'不检查，经常出现同物异名',s:1},{l:'B',t:'人工抽查，发现不一致再修改',s:2},
+        {l:'C',t:'翻译人员在项目中遵守，但其他部门不执行',s:3},
+        {l:'D',t:'翻译管理系统自动提示术语，审校环节强制检查',s:4},
+        {l:'E',t:'所有对外内容（文档、网站、客服脚本）都经过术语合规扫描',s:5}
+      ]}
+    ]
+  },
+  {
+    dimId: 2, dim: '翻译记忆库', icon: '💾', color: '#7C3AED', light: '#F3EEFF',
+    qs: [
+      { id:'Q5', text:'企业是否建立翻译记忆库（TM）？', opts:[
+        {l:'A',t:'没有TM，每次翻译从零开始',s:1},{l:'B',t:'有个别项目的TM文件，分散存储',s:2},
+        {l:'C',t:'有统一的TM库，但并非所有项目都入库',s:3},
+        {l:'D',t:'所有翻译项目强制使用TM并入库，复用率30%~60%',s:4},
+        {l:'E',t:'全公司统一TM库，复用率超过60%，且与内容管理系统联动',s:5}
+      ]},
+      { id:'Q6', text:'TM库的质量维护情况如何？', opts:[
+        {l:'A',t:'从未清洗，存在大量错误或过时内容',s:1},{l:'B',t:'偶尔手动清理，但效率低',s:2},
+        {l:'C',t:'每年集中清洗一次',s:3},{l:'D',t:'每季度自动去重/对齐，并有质量评分',s:4},
+        {l:'E',t:'实时自动维护，版本可追溯，错误率低于1%',s:5}
+      ]},
+      { id:'Q7', text:'是否利用TM进行成本/效率分析？', opts:[
+        {l:'A',t:'从不分析',s:1},{l:'B',t:'偶尔估算节省字数',s:2},
+        {l:'C',t:'每个项目后统计复用率和节省成本',s:3},
+        {l:'D',t:'定期分析TM资产价值并汇报管理层',s:4},
+        {l:'E',t:'通过BI看板实时展示TM带来的节省，作为绩效指标',s:5}
+      ]},
+      { id:'Q8', text:'旧翻译内容（如历史文档、PDF）是否被导入TM？', opts:[
+        {l:'A',t:'从未导入',s:1},{l:'B',t:'仅少量重要文档人工对齐导入',s:2},
+        {l:'C',t:'有计划地对主要产品线文档进行批量对齐',s:3},
+        {l:'D',t:'使用自动对齐工具，覆盖80%以上存量内容',s:4},
+        {l:'E',t:'所有存量多语言内容已完成对齐入库，且持续更新',s:5}
+      ]}
+    ]
+  },
+  {
+    dimId: 3, dim: '风格指南与规范', icon: '✍️', color: '#059669', light: '#ECFDF5',
+    qs: [
+      { id:'Q9', text:'企业是否有书面的语言风格指南？', opts:[
+        {l:'A',t:'无任何风格指南',s:1},{l:'B',t:'仅有简单格式规范（如日期、数字、标点）',s:2},
+        {l:'C',t:'有品牌语调描述，但内容简略',s:3},
+        {l:'D',t:'有详细的风格指南，包含语态、术语选用、多媒体字幕规范等',s:4},
+        {l:'E',t:'风格指南按语言/市场分别定制，且包含文化适配和禁忌说明',s:5}
+      ]},
+      { id:'Q10', text:'风格指南的更新频率和执行力如何？', opts:[
+        {l:'A',t:'多年不变，或从未执行',s:1},{l:'B',t:'不定期更新，员工执行靠自觉',s:2},
+        {l:'C',t:'每年更新一次，审校环节会参考',s:3},
+        {l:'D',t:'每季度根据市场反馈更新，新项目强制引用',s:4},
+        {l:'E',t:'风格指南嵌入写作/翻译工具，实时检查违规项，并有审计报告',s:5}
+      ]},
+      { id:'Q11', text:'不同市场（如中美日德）的内容是否遵循统一品牌语调？', opts:[
+        {l:'A',t:'各市场完全自由发挥',s:1},{l:'B',t:'总部有建议，但实际执行差异很大',s:2},
+        {l:'C',t:'核心品牌词统一，语气可不同',s:3},
+        {l:'D',t:'全球统一语调框架，允许适当本地化微调',s:4},
+        {l:'E',t:'通过本地化测试和用户调研验证语调一致性',s:5}
+      ]},
+      { id:'Q12', text:'是否有针对"避免使用"的词或表达的清单？', opts:[
+        {l:'A',t:'没有',s:1},{l:'B',t:'个别敏感词口头提醒',s:2},
+        {l:'C',t:'有简单列表，但未正式管理',s:3},
+        {l:'D',t:'有明确的禁用词库，并定期更新',s:4},
+        {l:'E',t:'禁用词库与术语库集成，自动扫描所有输出内容',s:5}
+      ]}
+    ]
+  },
+  {
+    dimId: 4, dim: '技术集成与自动化', icon: '⚙️', color: '#DC2626', light: '#FEF2F2',
+    qs: [
+      { id:'Q13', text:'企业使用什么工具管理语言资产？', opts:[
+        {l:'A',t:'仅用 Excel / Word 本地文件',s:1},{l:'B',t:'使用免费/轻量翻译工具，但资产分散',s:2},
+        {l:'C',t:'有专业翻译管理系统（TMS）或术语库工具',s:3},
+        {l:'D',t:'TMS 与公司内部 CMS / OA 系统部分集成',s:4},
+        {l:'E',t:'资产平台与 ERP、开发环境（Git）、客服系统等全链路打通',s:5}
+      ]},
+      { id:'Q14', text:'是否利用机器翻译（MT）结合语言资产？', opts:[
+        {l:'A',t:'不使用机器翻译',s:1},{l:'B',t:'随机使用公开MT，不结合术语',s:2},
+        {l:'C',t:'使用定制化MT，但未接入术语和TM',s:3},
+        {l:'D',t:'MT 引擎已加载术语库和风格指南，输出质量明显提升',s:4},
+        {l:'E',t:'采用自适应MT，每次人工修正后自动优化引擎',s:5}
+      ]},
+      { id:'Q15', text:'语言资产在内容创建和发布流程中的自动化程度？', opts:[
+        {l:'A',t:'完全人工操作',s:1},{l:'B',t:'部分环节有自动化脚本（如批量导入导出）',s:2},
+        {l:'C',t:'翻译项目自动分配、资产自动匹配',s:3},
+        {l:'D',t:'内容更新时自动触发翻译工作流，资产自动复用',s:4},
+        {l:'E',t:'智能内容管理系统：新内容生成后自动预翻译、合规检查，一键发布',s:5}
+      ]},
+      { id:'Q16', text:'是否利用 AI 能力提升语言资产管理效率？', opts:[
+        {l:'A',t:'无',s:1},{l:'B',t:'尝试过但未推广',s:2},
+        {l:'C',t:'使用 AI 进行术语自动抽取或重复句识别',s:3},
+        {l:'D',t:'AI 辅助质量检查（术语违规、风格偏离等）',s:4},
+        {l:'E',t:'AI 驱动整个资产生命周期：自动更新、智能推荐、预测性维护',s:5}
+      ]}
+    ]
+  },
+  {
+    dimId: 5, dim: '组织与文化', icon: '🏢', color: '#D97706', light: '#FFFBEB',
+    qs: [
+      { id:'Q17', text:'语言资产是否被视为公司正式资产，并有明确负责人？', opts:[
+        {l:'A',t:'无专人负责，资产散落各处',s:1},{l:'B',t:'由翻译供应商兼职管理',s:2},
+        {l:'C',t:'有内部岗位（如语言经理）兼职负责',s:3},
+        {l:'D',t:'有专职的语言资产管理者，并纳入部门KPI',s:4},
+        {l:'E',t:'设立"语言资产委员会"，跨部门高管共同决策预算和战略',s:5}
+      ]},
+      { id:'Q18', text:'语言资产的可见性和可访问性如何？', opts:[
+        {l:'A',t:'只有个别人知道资产存在',s:1},{l:'B',t:'部门内部通过共享盘可访问',s:2},
+        {l:'C',t:'全公司有权限的员工均可在线查询',s:3},
+        {l:'D',t:'不仅可查询，员工可便捷提交新术语或建议修改',s:4},
+        {l:'E',t:'资产平台嵌入日常工作界面（如写文档时自动提示术语），并定期培训',s:5}
+      ]},
+      { id:'Q19', text:'高管层对语言资产的重视程度体现在哪些方面？', opts:[
+        {l:'A',t:'从不提及',s:1},{l:'B',t:'仅在翻译预算审批时关注',s:2},
+        {l:'C',t:'年度战略会中作为成本控制议题',s:3},
+        {l:'D',t:'作为提升全球化效率的重点项目，给予预算支持',s:4},
+        {l:'E',t:'将语言资产成熟度纳入公司级 OKR，并定期向董事会汇报',s:5}
+      ]},
+      { id:'Q20', text:'公司是否定期评估语言资产的投资回报率（ROI）？', opts:[
+        {l:'A',t:'从不评估',s:1},{l:'B',t:'偶尔估算节省的翻译费',s:2},
+        {l:'C',t:'每年计算一次ROI',s:3},
+        {l:'D',t:'每季度分析成本节省、发布加速等效益',s:4},
+        {l:'E',t:'建立持续仪表板，实时展示资产价值，并用于决策优化',s:5}
+      ]}
+    ]
+  }
+]
+
+const LEVELS = [
+  {min:20,max:40,level:'初始级',emoji:'🌱',color:'#EF4444',desc:'语言资产意识薄弱，管理散乱，存在大量重复劳动和品牌风险。建议从术语表和翻译记忆库建设入手。'},
+  {min:41,max:60,level:'重复级',emoji:'🌿',color:'#F59E0B',desc:'有基础资产，但流程不规范，跨部门协同不足。需建立统一平台和标准流程。'},
+  {min:61,max:80,level:'规范级',emoji:'🌳',color:'#10B981',desc:'管理体系较完善，降本增效明显，但仍依赖人工。建议探索自动化和 AI 集成。'},
+  {min:81,max:90,level:'优秀级',emoji:'⭐',color:'#2B5CE6',desc:'资产整合良好，工具集成度高，数据驱动决策。可进一步优化多语言覆盖和动态更新。'},
+  {min:91,max:100,level:'领先级',emoji:'🏆',color:'#7C3AED',desc:'语言资产成为企业核心竞争力和全球化加速器，具备智能化和自适应能力。'}
+]
+
+let state = {
+  answers: {},
+  currentDim: 0,
+  formData: {}
+}
+
+function checkForm() {
+  const d = document.getElementById('dept').value.trim()
+  const p = document.getElementById('pos').value.trim()
+  const t = document.getElementById('ctype').value
+  const btn = document.getElementById('startBtn')
+  if (d && p && t) {
+    btn.className = 'start-btn active'
+  } else {
+    btn.className = 'start-btn inactive'
+  }
+}
+
+function startQuestionnaire() {
+  const d = document.getElementById('dept').value.trim()
+  const p = document.getElementById('pos').value.trim()
+  const t = document.getElementById('ctype').value
+  if (!d || !p || !t) {
+    alert('请完善带 * 的必填信息')
+    return
+  }
+  state.formData = { department: d, position: p, companyType: t, languagePair: document.getElementById('lang').value }
+  state.answers = {}
+  state.currentDim = 0
+  renderQuestionnaire(0)
+  showPage(1)
+}
+
+function renderQuestionnaire(dimIdx) {
+  const dim = QUESTIONS[dimIdx]
+  state.currentDim = dimIdx
+
+  // 更新进度
+  const answered = Object.keys(state.answers).length
+  const pct = Math.round(answered / 20 * 100)
+  document.getElementById('progText').textContent = `已完成 ${answered}/20 题`
+  document.getElementById('progPct').textContent = pct + '%'
+  document.getElementById('progFill').style.width = pct + '%'
+
+  // 更新TAB
+  let navHtml = ''
+  QUESTIONS.forEach((d, i) => {
+    const qAnswered = d.qs.filter(q => state.answers[q.id]).length
+    const done = qAnswered === d.qs.length
+    navHtml += `<div class="dim-nav-tab ${i===dimIdx?'tab-active':''}" onclick="renderQuestionnaire(${i})" style="${i===dimIdx?'border-bottom-color:'+d.color:''}">
+      <span class="tab-icon">${d.icon}</span>
+      <span class="tab-name" style="${i===dimIdx?'color:'+d.color:''}">${d.dim}</span>
+      <div class="tab-dot ${done?'done':''}"></div>
+    </div>`
+  })
+  document.getElementById('dimNav').innerHTML = navHtml
+
+  // 维度标题
+  const dimAnswered = dim.qs.filter(q => state.answers[q.id]).length
+  let html = `<div class="dim-header-card" style="background:${dim.light};border-left:5px solid ${dim.color}">
+    <div class="dim-h-left">
+      <span class="dim-h-icon">${dim.icon}</span>
+      <div>
+        <div class="dim-h-title">维度 ${dimIdx+1}：${dim.dim}</div>
+        <div class="dim-h-sub">共 ${dim.qs.length} 道题 · 已答 ${dimAnswered} 题</div>
+      </div>
+    </div>
+    <div class="dim-ring" style="border-color:${dim.color}">
+      <span class="dim-ring-text" style="color:${dim.color}">${dimAnswered}/${dim.qs.length}</span>
+    </div>
+  </div>`
+
+  // 题目
+  dim.qs.forEach(q => {
+    const sel = state.answers[q.id]
+    html += `<div class="q-card ${sel?'answered':''}">
+      <div class="q-header-row">
+        <div class="q-badge" style="background:${dim.color}">${q.id}</div>
+        <div class="q-text">${q.text}</div>
+      </div>
+      <div>`
+    q.opts.forEach(o => {
+      const isSel = sel && sel.l === o.l
+      html += `<div class="opt ${isSel?'selected':''}"
+        style="${isSel?'border-color:'+dim.color+';background:'+dim.light:''}"
+        onclick="selectOpt('${q.id}','${o.l}',${o.s},${dimIdx})">
+        <div class="opt-lbl" style="${isSel?'background:'+dim.color:''}">${o.l}</div>
+        <div class="opt-txt">${o.t}</div>
+        <div class="opt-sc">+${o.s}</div>
+      </div>`
+    })
+    html += '</div></div>'
+  })
+
+  // 按钮
+  const dimComplete = dim.qs.every(q => state.answers[q.id])
+  const isLast = dimIdx === QUESTIONS.length - 1
+  const allDone = Object.keys(state.answers).length >= 20
+  html += `<div class="nav-btns">`
+  if (dimIdx > 0) {
+    html += `<button class="nav-btn btn-prev-s" onclick="renderQuestionnaire(${dimIdx-1})">‹ 上一部分</button>`
+  } else {
+    html += `<div class="btn-ph"></div>`
+  }
+  if (!isLast) {
+    html += `<button class="nav-btn btn-next-s ${dimComplete?'btn-ok':'btn-no'}" onclick="${dimComplete?'renderQuestionnaire('+(dimIdx+1)+')':'showIncomplete()'}">下一部分 ›</button>`
+  } else {
+    html += `<button class="nav-btn btn-submit-s ${allDone?'btn-ok':'btn-no'}" onclick="${allDone?'submitQuestionnaire()':'showIncomplete()'}">提交并查看结果</button>`
+  }
+  html += '</div><div style="height:20px"></div>'
+
+  document.getElementById('qContent').innerHTML = html
+  document.getElementById('qContent').scrollTop = 0
+}
+
+function selectOpt(qid, label, score, dimIdx) {
+  state.answers[qid] = { l: label, s: score }
+  renderQuestionnaire(dimIdx)
+}
+
+function showIncomplete() {
+  alert('还有题目未完成，请作答全部题目后继续。')
+}
+
+function submitQuestionnaire() {
+  const allQIds = QUESTIONS.flatMap(d => d.qs.map(q => q.id))
+  const missing = allQIds.filter(id => !state.answers[id]).length
+  if (missing > 0) {
+    alert(`还有 ${missing} 道题未作答，请完成全部题目后提交。`)
+    return
+  }
+  renderResult()
+  showPage(2)
+}
+
+function renderResult() {
+  // 计算分数
+  let total = 0
+  const dimScores = QUESTIONS.map(dim => {
+    let score = 0
+    dim.qs.forEach(q => { if (state.answers[q.id]) score += state.answers[q.id].s })
+    total += score
+    return { name: dim.dim, icon: dim.icon, color: dim.color, light: dim.light, score, max: dim.qs.length * 5, pct: Math.round(score/(dim.qs.length*5)*100) }
+  })
+
+  const level = LEVELS.find(l => total >= l.min && total <= l.max) || LEVELS[0]
+  const now = new Date().toLocaleString('zh-CN')
+
+  let html = `<div class="score-hero" style="background:linear-gradient(145deg,${level.color},${level.color}aa)">
+    <div class="score-badge">
+      <span class="score-emoji">${level.emoji}</span>
+      <span class="score-num">${total}</span>
+      <span class="score-max">/100分</span>
+    </div>
+    <div class="level-pill">${level.level}</div>
+    <div class="score-time">提交时间：${now}</div>
+  </div>
+  <div class="r-card">
+    <div class="r-card-title">📋 填写人信息</div>
+    <div class="info-grid">
+      <div class="info-item-r"><span class="info-lbl">部门</span><span class="info-val-r">${state.formData.department}</span></div>
+      <div class="info-item-r"><span class="info-lbl">职位</span><span class="info-val-r">${state.formData.position}</span></div>
+      <div class="info-item-r"><span class="info-lbl">企业类型</span><span class="info-val-r">${state.formData.companyType}</span></div>
+      ${state.formData.languagePair?`<div class="info-item-r"><span class="info-lbl">语言对</span><span class="info-val-r">${state.formData.languagePair}</span></div>`:''}
+    </div>
+  </div>
+  <div class="r-card level-card" style="border-left-color:${level.color}">
+    <div class="r-card-title">🎯 成熟度等级</div>
+    <div class="level-h">
+      <span class="level-emoji-r">${level.emoji}</span>
+      <div>
+        <div class="level-name-r" style="color:${level.color}">${level.level}</div>
+        <div class="level-range-r">${level.min}–${level.max} 分区间</div>
+      </div>
+    </div>
+    <div class="level-desc-r">${level.desc}</div>
+  </div>
+  <div class="r-card">
+    <div class="r-card-title">📊 五维度能力雷达图</div>
+    <canvas class="radar" id="radarCanvas"></canvas>
+  </div>
+  <div class="r-card">
+    <div class="r-card-title">📈 各维度得分详情</div>`
+  dimScores.forEach(d => {
+    html += `<div class="dim-row">
+      <div class="dim-row-left">
+        <span class="dim-row-icon">${d.icon}</span>
+        <div class="dim-row-info">
+          <div class="dim-row-name">${d.name}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${d.pct}%;background:${d.color}"></div></div>
+        </div>
+      </div>
+      <div class="dim-row-right">
+        <span class="dim-sc-num" style="color:${d.color}">${d.score}</span>
+        <span class="dim-sc-tot">/${d.max}</span>
+      </div>
+    </div>`
+  })
+  html += `</div>
+  <div class="bottom-btns">
+    <button class="ab ab-restart" onclick="restartSurvey()">重新评估</button>
+    <button class="ab ab-contact">联系咨询专家</button>
+  </div>
+  <div class="footer-t">感谢您参与评估！如需详细分析报告或改进路线图，欢迎联系我们获取专业指导。</div>
+  <div style="height:30px"></div>`
+
+  document.getElementById('resultContent').innerHTML = html
+
+  // 绘制雷达图
+  setTimeout(() => drawRadar(dimScores), 100)
+}
+
+function drawRadar(dimScores) {
+  const canvas = document.getElementById('radarCanvas')
+  if (!canvas) return
+  const ctx = canvas.getContext('2d')
+  const W = canvas.offsetWidth
+  const H = 300
+  canvas.width = W
+  canvas.height = H
+  const cx = W/2, cy = H/2
+  const R = Math.min(W,H)/2 - 65
+  const n = dimScores.length
+  const max = 20
+
+  // 网格
+  for (let l = 1; l <= 4; l++) {
+    const r = R*(l/4)
+    ctx.beginPath()
+    for (let i = 0; i < n; i++) {
+      const a = (Math.PI*2*i/n)-Math.PI/2
+      const x = cx+r*Math.cos(a), y = cy+r*Math.sin(a)
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)
+    }
+    ctx.closePath()
+    ctx.strokeStyle = l===4?'#c5d0f5':'#e0e6fb'
+    ctx.lineWidth = l===4?1.5:1
+    ctx.stroke()
+  }
+
+  // 轴线
+  for (let i = 0; i < n; i++) {
+    const a = (Math.PI*2*i/n)-Math.PI/2
+    ctx.beginPath()
+    ctx.moveTo(cx,cy)
+    ctx.lineTo(cx+R*Math.cos(a),cy+R*Math.sin(a))
+    ctx.strokeStyle='#dde4f8'; ctx.lineWidth=1; ctx.stroke()
+  }
+
+  // 标签
+  for (let i = 0; i < n; i++) {
+    const a = (Math.PI*2*i/n)-Math.PI/2
+    const lr = R+48
+    const lx = cx+lr*Math.cos(a), ly = cy+lr*Math.sin(a)
+    ctx.textAlign='center'; ctx.textBaseline='middle'
+    ctx.font='16px PingFang SC'
+    ctx.fillText(dimScores[i].icon, lx, ly-10)
+    ctx.fillStyle='#555'; ctx.font='11px PingFang SC'
+    const name = dimScores[i].name.length > 4 ? dimScores[i].name.slice(0,4)+'…' : dimScores[i].name
+    ctx.fillText(name, lx, ly+10)
+  }
+
+  // 数据区域
+  ctx.beginPath()
+  for (let i = 0; i < n; i++) {
+    const r = R*(dimScores[i].score/max)
+    const a = (Math.PI*2*i/n)-Math.PI/2
+    const x=cx+r*Math.cos(a), y=cy+r*Math.sin(a)
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)
+  }
+  ctx.closePath()
+  ctx.fillStyle='rgba(43,92,230,0.18)'; ctx.fill()
+  ctx.strokeStyle='#2B5CE6'; ctx.lineWidth=2.5; ctx.stroke()
+
+  // 数据点+分值
+  for (let i = 0; i < n; i++) {
+    const r = R*(dimScores[i].score/max)
+    const a = (Math.PI*2*i/n)-Math.PI/2
+    const x=cx+r*Math.cos(a), y=cy+r*Math.sin(a)
+    ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2)
+    ctx.fillStyle='#2B5CE6'; ctx.fill()
+    ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke()
+    ctx.fillStyle='#2B5CE6'; ctx.font='bold 11px PingFang SC'
+    ctx.textAlign='center'; ctx.textBaseline='middle'
+    const sx=cx+(r+16)*Math.cos(a), sy=cy+(r+16)*Math.sin(a)
+    ctx.fillText(dimScores[i].score, sx, sy)
+  }
+}
+
+function restartSurvey() {
+  if (confirm('确定要清空当前答题记录并重新开始吗？')) {
+    state.answers = {}
+    state.currentDim = 0
+    document.getElementById('dept').value = ''
+    document.getElementById('pos').value = ''
+    document.getElementById('ctype').value = ''
+    document.getElementById('lang').value = ''
+    checkForm()
+    showPage(0)
+  }
+}
+
+function showPage(idx) {
+  const pages = ['page-index','page-q','page-result']
+  const titles = ['语言资产成熟度评估','成熟度问卷','评估结果']
+  pages.forEach((id,i) => {
+    document.getElementById(id).classList.toggle('active', i===idx)
+  })
+  document.getElementById('navTitle').textContent = titles[idx]
+  document.querySelectorAll('.pi').forEach((el,i) => el.classList.toggle('pact', i===idx))
+}
+</script>
+</body>
+</html>
