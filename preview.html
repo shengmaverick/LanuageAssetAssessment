@@ -645,6 +645,7 @@ function renderQuestionnaire(dimIdx) {
 
   document.getElementById('qContent').innerHTML = html
   document.getElementById('qContent').scrollTop = 0
+  window.scrollTo(0, 0)
 }
 
 function selectOpt(qid, label, score, dimIdx) {
@@ -673,12 +674,23 @@ function submitToSheet(payload) {
     console.log('[跳过] 未配置 Google Apps Script URL，数据仅本地展示')
     return Promise.resolve({ submitted: false })
   }
-  // 🎯 Image Pixel 方案：100% 无 CORS 限制，永不失败
-  const params = new URLSearchParams({ data: JSON.stringify(payload) })
+  // 精简 payload，去掉 answers 避免 URL 超长
+  const compact = {
+    submittedAt: payload.submittedAt,
+    contact: payload.contact,
+    totalScore: payload.totalScore,
+    level: payload.level,
+    dimensions: payload.dimensions
+  }
+  const encoded = encodeURIComponent(JSON.stringify(compact))
+  const url = SUBMIT_CONFIG.url + '?data=' + encoded + '&t=' + Date.now()
+  console.log('[提交数据] URL长度:', url.length, '字符')
+  console.log('[提交数据]', JSON.stringify(compact, null, 2))
+  // Image Pixel 方案：100% 无 CORS 限制
   const img = new Image()
-  img.onload = function() { console.log('[提交成功] Pixel 返回') }
-  img.onerror = function() { console.log('[提交成功] Pixel 触发') }
-  img.src = SUBMIT_CONFIG.url + '?' + params.toString() + '&t=' + Date.now()
+  img.onload = function() { console.log('[✓ Image Pixel 加载成功]') }
+  img.onerror = function() { console.log('[✓ Image Pixel 加载完成（无论成功或失败均回调）]') }
+  img.src = url
   return Promise.resolve({ submitted: true })
 }
 
@@ -702,8 +714,7 @@ function submitQuestionnaire() {
     contact: state.formData,
     totalScore: total,
     level: level.level,
-    dimensions: dimScores,
-    answers: state.answers
+    dimensions: dimScores
   }
   // 先渲染结果（不阻塞）
   renderResult()
@@ -711,7 +722,6 @@ function submitQuestionnaire() {
   // 后台提交到 Sheets
   submitToSheet(payload).then(res => {
     if (!res.submitted) {
-      // 提示用户还未配置（仅开发时）
       const el = document.getElementById('submitTip')
       if (el) el.style.display = 'block'
     }
